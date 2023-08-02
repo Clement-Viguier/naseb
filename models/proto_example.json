@@ -27,9 +27,9 @@
             "cost": -10
         },
         {
-            "name": "etp",
+            "name": "pet",
             "type": "output",
-            "max_flow":"bassin_etp",
+            "max_flow":"bassin_pet",
             "cost": -500
         },
         {
@@ -48,7 +48,7 @@
     "edges": [
         ["roof_rainwater", "rain_link"],
         ["rain_link", "bassin1"],
-        ["bassin1", "etp"],
+        ["bassin1", "pet"],
         ["bassin1", "reservoir1"],
         ["reservoir1", "bassin1"],
         ["bassin1", "overflow"]
@@ -57,11 +57,11 @@
         "roof_prec": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["prec", "recuperation_factor"]
+            "parameters": ["prec", "recuperation_factor", "roof_area"]
         },
         "prec":{
             "type": "dataframe",
-            "url": "../data/canéjan interpolé 1992-01-01 to 2022-12-31.csv",
+            "url": "../data/weather_data.csv",
             "column": "precip",
             "index_col": "datetime",
             "parse_dates": true
@@ -71,20 +71,30 @@
             "type": "constant",
             "value": 0.8
         },
-        "bassin_etp": {
+        "roof_area": {
+            "name": "roof_area",
+            "type": "constant",
+            "value": 200000
+        },
+        "bassin_pet": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["etp", "bassin_area"]
+            "parameters": ["pet", "bassin_area", "pet_penalty_factor"]
         },
-        "etp":{
+        "pet":{
             "type": "dataframe",
-            "url": "../data/canéjan interpolé 1992-01-01 to 2022-12-31.csv",
-            "column": "precip",
+            "url": "../data/weather_data.csv",
+            "column": "pet_penman",
             "index_col": "datetime",
             "parse_dates": true
         },
         "bassin_area": {
-            "name": "recuperation_factor",
+            "name": "bassin_area",
+            "type": "constant",
+            "value": 13000
+        },
+        "pet_penalty_factor": {
+            "name": "pet_penalty_factor",
             "type": "constant",
             "value": 1.864
         }
@@ -93,6 +103,18 @@
         "bassin_volume": {
             "type": "numpyarraystoragerecorder",
             "node": "bassin1"
+        },
+        "pet_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "pet"
+        },
+        "rainwater_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "roof_rainwater"
+        },
+        "bassin_overflow": {
+            "type": "numpyarraynoderecorder",
+            "node": "overflow"
         }
     }
 }
