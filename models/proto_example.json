@@ -1,0 +1,98 @@
+{
+    "metadata": {
+        "title": "A simple model of a swiming pool with a storage reservoir",
+        "description": "This model uses weather data from Merignac."
+    },
+    "timestepper": {
+        "start": "1992-01-01",
+        "end": "2022-12-31",
+        "timestep": 10
+    },
+    "nodes": [
+        {
+            "name": "roof_rainwater",
+            "type": "catchment",
+            "flow": "roof_prec"
+        },
+        {
+            "name": "rain_link",
+            "type": "link"
+        },
+        {
+            "name": "bassin1",
+            "type": "storage",
+            "max_volume": 20000,
+            "min_volume": 0,
+            "initial_volume": 20000,
+            "cost": -10
+        },
+        {
+            "name": "etp",
+            "type": "output",
+            "max_flow":"bassin_etp",
+            "cost": -500
+        },
+        {
+            "name": "reservoir1",
+            "type": "storage",
+            "max_volume": 2000,
+            "initial_volume": 2000,
+            "min_volume": 0,
+            "cost": -10
+        },
+        {
+            "name": "overflow",
+            "type": "output"
+        }
+    ],
+    "edges": [
+        ["roof_rainwater", "rain_link"],
+        ["rain_link", "bassin1"],
+        ["bassin1", "etp"],
+        ["bassin1", "reservoir1"],
+        ["reservoir1", "bassin1"],
+        ["bassin1", "overflow"]
+    ],
+    "parameters": {
+        "roof_prec": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["prec", "recuperation_factor"]
+        },
+        "prec":{
+            "type": "dataframe",
+            "url": "../data/canéjan interpolé 1992-01-01 to 2022-12-31.csv",
+            "column": "precip",
+            "index_col": "datetime",
+            "parse_dates": true
+        },
+        "recuperation_factor": {
+            "name": "recuperation_factor",
+            "type": "constant",
+            "value": 0.8
+        },
+        "bassin_etp": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["etp", "bassin_area"]
+        },
+        "etp":{
+            "type": "dataframe",
+            "url": "../data/canéjan interpolé 1992-01-01 to 2022-12-31.csv",
+            "column": "precip",
+            "index_col": "datetime",
+            "parse_dates": true
+        },
+        "bassin_area": {
+            "name": "recuperation_factor",
+            "type": "constant",
+            "value": 1.864
+        }
+    },
+    "recorders": {
+        "bassin_volume": {
+            "type": "numpyarraystoragerecorder",
+            "node": "bassin1"
+        }
+    }
+}
