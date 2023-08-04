@@ -19,6 +19,14 @@
             "type": "link"
         },
         {
+            "name": "rainwater_storage",
+            "type": "storage",
+            "max_volume": 1750,
+            "min_volume": 0,
+            "initial_volume": 0,
+            "cost": -10
+        },
+        {
             "name": "bassin1",
             "type": "storage",
             "max_volume": 20000,
@@ -47,6 +55,8 @@
     ],
     "edges": [
         ["roof_rainwater", "rain_link"],
+        ["rain_link", "rainwater_storage"],
+        ["rainwater_storage", "rain_link"],
         ["rain_link", "bassin1"],
         ["bassin1", "pet"],
         ["bassin1", "reservoir1"],
@@ -57,7 +67,7 @@
         "roof_prec": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["prec", "recuperation_factor", "roof_area"]
+            "parameters": ["prec", "recuperation_factor", "roof_area", "mm_to_m3"]
         },
         "prec":{
             "type": "dataframe",
@@ -74,12 +84,17 @@
         "roof_area": {
             "name": "roof_area",
             "type": "constant",
-            "value": 200000
+            "value": 23833
+        },
+        "mm_to_m3": {
+            "name": "mm_to_m3",
+            "type": "constant",
+            "value": 0.001
         },
         "bassin_pet": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["pet", "bassin_area", "pet_penalty_factor"]
+            "parameters": ["pet", "bassin_area", "pet_penalty_factor", "mm_to_m3"]
         },
         "pet":{
             "type": "dataframe",
@@ -91,12 +106,12 @@
         "bassin_area": {
             "name": "bassin_area",
             "type": "constant",
-            "value": 13000
+            "value": 13548
         },
         "pet_penalty_factor": {
             "name": "pet_penalty_factor",
             "type": "constant",
-            "value": 1.864
+            "value": 1.5
         }
     },
     "recorders": {
