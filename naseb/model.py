@@ -5,7 +5,6 @@ import networkx as nx
 import numpy as np
 
 from pywr.model import Model
-from pywr.notebook import draw_graph
 from pyet.combination import penman
 # from pywr.nodes import Input, Output, Link
 
@@ -45,7 +44,7 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
     data = enrich_data(data)
 
     used_columns = ['temp', 'windspeed', 'tempmin', 'tempmax', 'humidity',
-                    'sealevelpressure']
+                    'sealevelpressure', 'precip']
     data[used_columns] = data[used_columns].fillna(method='bfill')
 
     int_columns = ["sealevelpressure"]
@@ -78,6 +77,9 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
         lat=np.deg2rad(site_latitude),
     )
 
+    data['pet_corrected'] = data['pet_penman']/2
+
+    # data['pet_corrected'] = data['pet_corrected'].fillna(method='bfill')
     print(data.describe())
 
     if (path is not None):

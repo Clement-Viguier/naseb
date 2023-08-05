@@ -5,8 +5,8 @@
     },
     "timestepper": {
         "start": "1992-01-01",
-        "end": "2022-12-31",
-        "timestep": 10
+        "end": "2022-12-30",
+        "timestep": 1
     },
     "nodes": [
         {
@@ -27,12 +27,12 @@
             "cost": -10
         },
         {
-            "name": "bassin1",
+            "name": "bassin1and2",
             "type": "storage",
             "max_volume": 20000,
             "min_volume": 0,
             "initial_volume": 20000,
-            "cost": -10
+            "cost": -100
         },
         {
             "name": "pet",
@@ -41,7 +41,7 @@
             "cost": -500
         },
         {
-            "name": "reservoir1",
+            "name": "reservoir_tampon",
             "type": "storage",
             "max_volume": 2000,
             "initial_volume": 2000,
@@ -57,11 +57,11 @@
         ["roof_rainwater", "rain_link"],
         ["rain_link", "rainwater_storage"],
         ["rainwater_storage", "rain_link"],
-        ["rain_link", "bassin1"],
-        ["bassin1", "pet"],
-        ["bassin1", "reservoir1"],
-        ["reservoir1", "bassin1"],
-        ["bassin1", "overflow"]
+        ["rain_link", "bassin1and2"],
+        ["bassin1and2", "pet"],
+        ["bassin1and2", "reservoir_tampon"],
+        ["reservoir_tampon", "bassin1and2"],
+        ["bassin1and2", "overflow"]
     ],
     "parameters": {
         "roof_prec": {
@@ -99,7 +99,7 @@
         "pet":{
             "type": "dataframe",
             "url": "../data/weather_data.csv",
-            "column": "pet_penman",
+            "column": "pet_corrected",
             "index_col": "datetime",
             "parse_dates": true
         },
@@ -117,7 +117,7 @@
     "recorders": {
         "bassin_volume": {
             "type": "numpyarraystoragerecorder",
-            "node": "bassin1"
+            "node": "bassin1and2"
         },
         "pet_flow": {
             "type": "numpyarraynoderecorder",
@@ -130,6 +130,14 @@
         "bassin_overflow": {
             "type": "numpyarraynoderecorder",
             "node": "overflow"
+        },
+        "tampon": {
+            "type": "numpyarraystoragerecorder",
+            "node": "reservoir_tampon"
+        },
+        "rain_reservoir": {
+            "type": "numpyarraystoragerecorder",
+            "node": "rainwater_storage"
         }
     }
 }
