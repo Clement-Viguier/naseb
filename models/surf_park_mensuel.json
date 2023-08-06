@@ -37,7 +37,7 @@
             "max_volume": 20000,
             "min_volume": 0,
             "initial_volume": 20000,
-            "cost": -100
+            "cost": -300
         },
         {
             "name": "pet",
@@ -55,7 +55,8 @@
         },
         {
             "name": "overflow",
-            "type": "output"
+            "type": "output",
+            "cost":1000
         }
     ],
     "edges": [
@@ -73,20 +74,23 @@
         "roof_prec": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["prec", "recuperation_factor", "roof_area", "mm_to_m3"]
+            "parameters": ["prec", "recuperation_factor", "roof_area", "mm_to_m3", "month_inverse_duration"]
         },
         "bassin_prec": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["prec", "bassin_area", "mm_to_m3"]
+            "parameters": ["prec", "bassin_area", "mm_to_m3", "month_inverse_duration"]
         },
         "prec":{
-            "type": "dataframe",
-            "url": "../data/weather_data.csv",
-            "column": "precip",
-            "index_col": "datetime",
-            "parse_dates": true
+            "type": "monthlyprofile",
+            "values":[88.13548387,	67.14516129,	61.50967742,	73.78709677,	70.43870968,	74.57741935,	43.80967742,	56.14516129,	77.44193548,	78.69032258,	110.6741935,	107.9870968]
         },
+        "month_inverse_duration":{
+            "type":"monthlyprofile",
+            "values":[0.03225806, 0.03539823, 0.03225806, 0.03333333, 0.03225806,
+            0.03333333, 0.03225806, 0.03225806, 0.03333333, 0.03225806,
+            0.03333333, 0.03225806]
+        }, 
         "recuperation_factor": {
             "name": "recuperation_factor",
             "type": "constant",
@@ -105,14 +109,11 @@
         "bassin_pet": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["pet", "bassin_area", "pet_penalty_factor", "mm_to_m3"]
+            "parameters": ["pet", "pet_penalty_factor", "month_inverse_duration"]
         },
         "pet":{
-            "type": "dataframe",
-            "url": "../data/weather_data.csv",
-            "column": "pet_corrected",
-            "index_col": "datetime",
-            "parse_dates": true
+            "type": "monthlyprofile",
+            "values": [229, 441, 912, 1334, 1400, 2077, 2192, 1902, 1288, 721, 299, 189]
         },
         "bassin_area": {
             "name": "bassin_area",
@@ -122,7 +123,7 @@
         "pet_penalty_factor": {
             "name": "pet_penalty_factor",
             "type": "constant",
-            "value": 1.5
+            "value": 1
         }
     },
     "recorders": {

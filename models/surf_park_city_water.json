@@ -70,7 +70,7 @@
             "name": "reservoir_tampon",
             "type": "storage",
             "max_volume": 2000,
-            "initial_volume": 2000,
+            "initial_volume": 0,
             "min_volume": 0,
             "cost": -10
         },
