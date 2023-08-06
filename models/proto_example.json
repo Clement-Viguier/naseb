@@ -27,6 +27,11 @@
             "cost": -10
         },
         {
+            "name": "bassin_rainwater",
+            "type": "catchment",
+            "flow": "bassin_prec"
+        },
+        {
             "name": "bassin1and2",
             "type": "storage",
             "max_volume": 20000,
@@ -58,6 +63,7 @@
         ["rain_link", "rainwater_storage"],
         ["rainwater_storage", "rain_link"],
         ["rain_link", "bassin1and2"],
+        ["bassin_rainwater", "bassin1and2"],
         ["bassin1and2", "pet"],
         ["bassin1and2", "reservoir_tampon"],
         ["reservoir_tampon", "bassin1and2"],
@@ -68,6 +74,11 @@
             "type": "aggregated",
             "agg_func": "product",
             "parameters": ["prec", "recuperation_factor", "roof_area", "mm_to_m3"]
+        },
+        "bassin_prec": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["prec", "bassin_area", "mm_to_m3"]
         },
         "prec":{
             "type": "dataframe",
