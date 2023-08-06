@@ -92,6 +92,7 @@ def model_surf_park():
 
     m = Model.load("./models/hydropower_example.json")
     m = Model.load("./models/proto_example.json")
+    m = Model.load("./models/surf_park_city_water.json")
 
     # print(draw_graph(m)) # only works in notebook
 
