@@ -14,13 +14,23 @@ from pyet.combination import penman
 # sunrise,sunset,moonphase,conditions,description,icon,stations
 
 
+def add_time_columns(data, datetime_column: str | None = None):
+    if datetime_column is None:
+        datetime_column = 'datetime'
+
+    data[datetime_column] = pd.to_datetime(data[datetime_column])
+    data['dayofyear'] = data[datetime_column].dt.day_of_year
+    data['year'] = data[datetime_column].dt.year
+    data['weekofyear'] = data[datetime_column].dt.isocalendar().week
+    return data
+
+
 def enrich_data(data):
 
     data['hours_of_daylight'] = (pd.to_datetime(
         data['sunset'])-pd.to_datetime(data['sunrise'])).dt.total_seconds()/3600
 
-    data['datetime'] = pd.to_datetime(data['datetime'])
-    data['dayofyear'] = data['datetime'].dt.day_of_year
+    data = add_time_columns(data)
 
     solar_energy_map = data.groupby(
         'dayofyear')['solarenergy'].mean().to_dict()
@@ -88,12 +98,15 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
     return data
 
 
-def model_surf_park():
+def model_surf_park(model_path: str | None = None):
 
-    m = Model.load("./models/hydropower_example.json")
-    m = Model.load("./models/proto_example.json")
-    m = Model.load("./models/surf_park_city_water.json")
-    m = Model.load("./models/surf_park_mensuel.json")
+    # m = Model.load("./models/hydropower_example.json")
+    # m = Model.load("./models/proto_example.json")
+    # m = Model.load("./models/surf_park_city_water.json")
+    if model_path is None:
+        model_path = "./models/surf_park_mensuel_copy.json"
+
+    m = Model.load(model_path)
 
     # print(draw_graph(m)) # only works in notebook
 
@@ -103,9 +116,19 @@ def model_surf_park():
     # print(m.recorders["turbine1_energy"].values())
 
     df = m.to_dataframe()
+    df = df.droplevel(1, axis=1)
+    df.reset_index(drop=False, inplace=True)
+
+    print(df['index'].dtype)
+    df['index'] = df['index'].dt.to_timestamp()
+    print(df['index'].dtype)
+
     print(df.head(30))
+    df = add_time_columns(df, 'index')
 
     from matplotlib import pyplot as plt
 
     df.plot(subplots=True)
-    plt.show()
+    # plt.show()
+
+    return df

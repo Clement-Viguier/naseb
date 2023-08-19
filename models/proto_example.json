@@ -138,6 +138,10 @@
             "type": "numpyarraynoderecorder",
             "node": "roof_rainwater"
         },
+        "bassin_rainwater_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "bassin_rainwater"
+        },
         "bassin_overflow": {
             "type": "numpyarraynoderecorder",
             "node": "overflow"

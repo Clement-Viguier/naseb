@@ -1,0 +1,296 @@
+---
+title: "ggplot2 demo"
+author: "Norah Jones"
+date: "5/22/2021"
+format: 
+  html:
+    fig-width: 8
+    fig-height: 4
+    code-fold: true
+---
+
+# Surf park visualisation
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(ggwaffle)
+library(hrbrthemes)
+```
+
+### Data
+
+```{r, data}
+
+weather <- read.csv('../../data/weather_data.csv')
+
+sim_no_water <- read.csv('../../sim/sim_proto_example.csv')
+sim_city_water <- read.csv('../../sim/sim_surf_park_city_water.csv')
+```
+
+### Plotting
+
+#### Theme
+
+```{r, theme}
+
+default_blue <- "#73d0f2"
+default_red <- "#f29573"
+dark_blue = "#2A778E"
+light_blue = "#E0F2FB"
+default_white = "white"
+
+
+blue_theme <- function() {
+  default_blue <- "#73d0f2"
+  default_ref <- "#f29573"
+  dark_blue = "#2A778E"
+  light_blue = "#E0F2FB"
+  default_white = "white"
+  
+  theme(
+    # add border 1)
+    panel.border = element_rect(colour = dark_blue, fill = NA, linetype = 2),
+    # color background 2)
+    panel.background = element_rect(fill = default_white),
+    # modify grid 3)
+    panel.grid.major.x = element_line(colour = default_blue, linetype = 3, size = 0.5),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y =  element_line(colour = default_blue, linetype = 3, size = 0.5),
+    panel.grid.minor.y = element_blank(),
+    # modify text, axis and colour 4) and 5)
+    axis.text = element_text(colour = default_blue, face = "italic", family = "Times New Roman"),
+    axis.title = element_text(colour = default_blue, family = "Times New Roman"),
+    axis.ticks = element_line(colour = default_blue),
+    # legend at the bottom 6)
+    legend.position = "bottom"
+  )
+}
+```
+
+#### Plots
+
+- weather yearly circular plot
+- capacity with no filling
+- weekly and yearly water need
+- waffle plot of consumption vs Canéjan
+
+```{r}
+weekly_sim <- sim_city_water %>%
+  filter(year>1992) %>% 
+  group_by(year, weekofyear) %>% 
+  summarise(
+    city_link_flow = sum(city_link_flow),
+    rain_water_flow = sum(rainwater_flow),
+    pet_flow = sum(pet_flow),
+    rainwater_flow = sum(rainwater_flow),
+    bassin_rainwater_flow = sum(bassin_rainwater_flow)
+  )
+
+yearly_sim <- sim_city_water %>%
+  filter(year>1992) %>% 
+  group_by(year) %>% 
+  summarise(
+    city_link_flow = sum(city_link_flow),
+    rain_water_flow = sum(rainwater_flow),
+    pet_flow = sum(pet_flow),
+    rainwater_flow = sum(rainwater_flow),
+    bassin_rainwater_flow = sum(bassin_rainwater_flow)
+  )
+
+weekly_weather <- weather %>%
+  filter(year>1992) %>% 
+  group_by(year, weekofyear) %>% 
+  summarise(
+    pet_corrected=mean(pet_corrected),
+    precip = sum(precip),
+    solarenergy = sum(solarenergy),
+  ) 
+```
+
+
+```{r, weather2}
+offset = 2000
+offset_2 <- offset * 1.8
+blue ="#00BFC4"
+red="#F8766D"
+
+weekly_sim %>%
+  ggplot(aes(weekofyear)) +
+  geom_segment(aes(xend=weekofyear, y=offset+pet_flow, yend=offset+rainwater_flow+bassin_rainwater_flow, colour=pet_flow<(rainwater_flow+bassin_rainwater_flow)), size=0.7)+
+  geom_segment(aes(xend=weekofyear, y=offset_2, yend=offset_2+city_link_flow, colour=default_blue), size=0.8)+
+  # geom_point(aes(size = city_link_flow),x=0, y=0, data=yearly_sim, colour=blue, shape=21, fill=blue)+
+  # geom_point(aes(size = ifelse(city_link_flow==0, NA, city_link_flow), y=1*offset), alpha=0.3)+
+  geom_text(aes(label = year),x=0, y=0, data=yearly_sim,)+
+  scale_size_continuous(range=c(0, 3))+
+  scale_colour_manual(
+    name = "Bilan hydrique",
+    values=c(dark_blue, default_red, default_blue),
+    labels = c( "Remplissage", "Evaporation majoritare", "Précipitations majoritaire")
+  ) +
+  # geom_line(aes(y=offset+pet_flow), colour=red)+
+  # geom_line(aes(y=offset+rainwater_flow+bassin_rainwater_flow), colour=blue)+
+  # geom_line(aes(y=offset+pet_flow), colour=red)+
+  # geom_line(aes(y=offset+rainwater_flow+bassin_rainwater_flow), colour=blue)+
+  facet_wrap(~year, ncol = 6) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, NA)) +
+  coord_polar()+
+  theme_void()+
+theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank(),
+  legend.position = "top"
+)
+
+
+```
+
+```{r, capacity}
+volume_bassin2 = 13000
+volume_bassin1 = 7000
+total_volume <- volume_bassin1+volume_bassin2
+
+capacities <- c(0, volume_bassin1, volume_bassin2, total_volume)
+tolerance <- 0.0
+
+sim_no_water <- sim_no_water %>% mutate(capacity = case_when(
+  bassin_volume < volume_bassin1*(1-tolerance) ~ 0,
+  bassin_volume < volume_bassin2*(1-tolerance) ~ volume_bassin1,
+  bassin_volume < total_volume*(1-tolerance) ~ volume_bassin2, 
+  .default = total_volume)
+  )
+
+```
+
+
+```{r, capacity_plot}
+
+average_sim <- sim_no_water %>% 
+  group_by(dayofyear) %>% 
+  summarise(bassin_volume_median=median(bassin_volume),
+            bassin_volume_mean=mean(bassin_volume),
+            )
+
+sim_no_water %>%
+    ggplot() +
+    # geom_ribbon(aes(dayofyear, ymin=0, ymax=bassin_volume, group=year), fill=default_blue, alpha=0.15) +
+    geom_line(aes(dayofyear, y=bassin_volume/total_volume*100, group=year, colour=default_blue), alpha=0.8) +
+    geom_line(aes(dayofyear, y=bassin_volume_median/total_volume*100,  colour=dark_blue), size=1, data=average_sim) +
+    # geom_line(aes(dayofyear, y=bassin_volume_mean/total_volume*100), colour=dark_blue, linetype="dashed", data=average_sim) +
+  theme_ipsum_rc(grid="") +
+  scale_colour_manual(
+    name = NULL,
+    values=c(dark_blue, default_blue),
+    labels = c("Médiane", "Données annuelles")
+  ) +
+    # facet_wrap(~year, ncol = 6) +
+    # geom_step(aes(x=dayofyear, y=capacity, group=year)) +
+    geom_abline(intercept=volume_bassin2/total_volume*100, slope=0, linetype="dotted") +
+    geom_abline(intercept=volume_bassin1/total_volume*100, slope=0, linetype="dotted") +
+    labs(y="Taux de remplissage (%)", x="Jour de l'année")
+
+
+```
+
+```{r, capacity_plot}
+
+sim_no_water %>%
+  arrange(desc(bassin_volume)) %>% 
+  mutate(X=1:length(X)) %>% 
+    ggplot() +
+    geom_ribbon(aes(X/length(X)*100, ymin=0, ymax=bassin_volume/total_volume*100, fill=default_blue)) +
+  theme_ipsum_rc(grid="x") +
+    geom_step(aes(x=X/length(X)*100, y=capacity/total_volume*100, colour=dark_blue)) +
+    geom_abline(intercept=volume_bassin2/total_volume*100, slope=0, linetype="dotted") +
+    geom_abline(intercept=volume_bassin1/total_volume*100, slope=0, linetype="dotted") +
+  scale_fill_manual(
+    name = NULL,
+    values=c(default_blue),
+    labels = c("Taux de remplissage")
+  ) +
+  scale_colour_manual(
+    name = NULL,
+    values=c(dark_blue),
+    labels = c("Capacité du park")
+  ) +
+    labs(y="Taux de remplissage et capacité du park (ligne)", x="Poucentage de temps")
+
+
+```
+
+```{r, input}
+
+p1 <- sim_city_water %>% 
+  ggplot(aes(year, y=dayofyear))+
+  geom_raster(aes(fill=ifelse(city_link_flow==0, NA, city_link_flow)))+
+  scale_fill_gradient(low=light_blue, high=default_blue,
+    na.value = "white")+
+  theme_ipsum_rc(grid="")+
+  theme(legend.position = "none")+
+  labs(x=NULL, y="Jour de l'année")
+p1
+
+p2 <- yearly_sim %>% 
+  ggplot(aes(year))+
+  geom_col(aes(y=city_link_flow/1000), fill=default_blue, width=0.3)+
+  theme_ipsum_rc(grid="y")+
+  scale_y_continuous(labels = function(x) x * 1000, # make this multiplyer the same as n_rows
+                     expand = c(0,0)) +
+  labs(x="Année", y="Consommation\nremplissage surfpark (m3)")
+p2
+
+
+layout <- matrix(c(1,
+                   2), ncol = 1, byrow = TRUE)
+
+grid.arrange(
+  p1,
+  p2,
+  layout_matrix=layout)
+
+```
+
+```{r, waffle}
+
+library(waffle)
+# library(plyr)
+
+consommation_annuelle_2021 <- 354426.0
+population_canejan_2020 <-	6000.0
+rendement	<- 0.9
+limite_pref <-	430000.0
+volume_per_habitant <-	53.3
+habitant_per_household <- 2.2
+width <- 10
+
+reduction_factor <- volume_per_habitant*habitant_per_household*10
+
+sim_city_water %>% 
+  summarise(city_link_flow=sum(city_link_flow),
+            conso_canejan=consommation_annuelle_2021) %>% 
+  pivot_longer(cols=1:2, values_to = "values", names_to="names") %>%
+  arrange(desc(names)) %>% 
+  ggplot(aes(fill = names, values = values/reduction_factor)) +
+  geom_waffle(color = "white", size = .25, n_rows = width, flip = FALSE, na.rm = FALSE) +
+  geom_vline(xintercept = limite_pref/reduction_factor/width)+
+  # facet_wrap(~year, nrow = 1, strip.position = "bottom") +
+  scale_y_discrete() +
+  scale_x_continuous(labels = function(x) x * width*reduction_factor, # make this multiplyer the same as n_rows
+                     expand = c(0,0)) +
+  scale_fill_manual(
+    name = "Consommation\nannuelles moyennes",
+    values = c(default_red, default_blue),
+    labels = c("Surfpark", "Canéjan")
+  ) +
+  labs(title="La consommation en eau de ville du surf park\nferait dépasser la limite préfectorale",
+       subtitle="Un carré = 10 foyers",
+       x="Volume (m3)")+
+  coord_equal()+
+  theme_ipsum_rc(grid="") 
+
+
+```
+
+

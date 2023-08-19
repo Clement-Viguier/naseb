@@ -5,7 +5,7 @@
     },
     "timestepper": {
         "start": "1992-01-01",
-        "end": "2022-12-30",
+        "end": "1992-01-12",
         "timestep": 1
     },
     "nodes": [
@@ -32,33 +32,12 @@
             "flow": "bassin_prec"
         },
         {
-            "name": "network",
-            "type": "catchment",
-            "flow": "constant_input"
-        },
-        {
-            "name": "city_water_storage",
-            "type": "storage",
-            "max_volume": 200000,
-            "min_volume": 0,
-            "initial_volume": 200000
-        },
-        {
-            "name": "city_link",
-            "type": "link",
-            "cost":50
-        },
-        {
-            "name": "city_overflow",
-            "type": "output"
-        },
-        {
             "name": "bassin1and2",
             "type": "storage",
             "max_volume": 20000,
             "min_volume": 0,
             "initial_volume": 20000,
-            "cost": -100
+            "cost": -300
         },
         {
             "name": "pet",
@@ -76,7 +55,8 @@
         },
         {
             "name": "overflow",
-            "type": "output"
+            "type": "output",
+            "cost":1000
         }
     ],
     "edges": [
@@ -84,10 +64,6 @@
         ["rain_link", "rainwater_storage"],
         ["rainwater_storage", "rain_link"],
         ["rain_link", "bassin1and2"],
-        ["network", "city_water_storage"],
-        ["city_water_storage", "city_overflow"],
-        ["city_water_storage", "city_link"],
-        ["city_link", "bassin1and2"],
         ["bassin_rainwater", "bassin1and2"],
         ["bassin1and2", "pet"],
         ["bassin1and2", "reservoir_tampon"],
@@ -105,11 +81,11 @@
             "agg_func": "product",
             "parameters": ["prec", "bassin_area", "mm_to_m3"]
         },
-        "prec":{
+        "prec": {
             "type": "dataframe",
-            "url": "../data/weather_data.csv",
-            "column": "precip",
-            "index_col": "datetime",
+            "url": "../data/monthly_avg_data.csv",
+            "column": "value",
+            "index_col": "fake_index",
             "parse_dates": true
         },
         "recuperation_factor": {
@@ -130,13 +106,13 @@
         "bassin_pet": {
             "type": "aggregated",
             "agg_func": "product",
-            "parameters": ["pet", "bassin_area", "pet_penalty_factor", "mm_to_m3"]
+            "parameters": ["pet", "pet_penalty_factor"]
         },
         "pet":{
             "type": "dataframe",
-            "url": "../data/weather_data.csv",
-            "column": "pet_corrected",
-            "index_col": "datetime",
+            "url": "../data/monthly_avg_data.csv",
+            "column": "pet",
+            "index_col": "fake_index",
             "parse_dates": true
         },
         "bassin_area": {
@@ -147,12 +123,7 @@
         "pet_penalty_factor": {
             "name": "pet_penalty_factor",
             "type": "constant",
-            "value": 1.5
-        },
-        "constant_input": {
-            "name":"constant_input",
-            "type":"constant",
-            "value":20000
+            "value": 1
         }
     },
     "recorders": {
@@ -168,23 +139,15 @@
             "type": "numpyarraynoderecorder",
             "node": "roof_rainwater"
         },
-        "bassin_rainwater_flow": {
-            "type": "numpyarraynoderecorder",
-            "node": "bassin_rainwater"
-        },
         "bassin_overflow": {
             "type": "numpyarraynoderecorder",
             "node": "overflow"
         },
-        "city_link_flow": {
-            "type": "numpyarraynoderecorder",
-            "node": "city_link"
-        },
-        "tampon_volume": {
+        "tampon": {
             "type": "numpyarraystoragerecorder",
             "node": "reservoir_tampon"
         },
-        "rainwater_storage_volume": {
+        "rain_reservoir": {
             "type": "numpyarraystoragerecorder",
             "node": "rainwater_storage"
         }
