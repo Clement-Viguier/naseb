@@ -21,6 +21,7 @@ def add_time_columns(data, datetime_column: str | None = None):
     data[datetime_column] = pd.to_datetime(data[datetime_column])
     data['dayofyear'] = data[datetime_column].dt.day_of_year
     data['year'] = data[datetime_column].dt.year
+    data['month'] = data[datetime_column].dt.month
     data['weekofyear'] = data[datetime_column].dt.isocalendar().week
     return data
 
@@ -98,7 +99,7 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
     return data
 
 
-def model_surf_park(model_path: str | None = None):
+def model_surf_park(model_path: str | None = None, index: str or None = None):
 
     # m = Model.load("./models/hydropower_example.json")
     # m = Model.load("./models/proto_example.json")
@@ -118,17 +119,13 @@ def model_surf_park(model_path: str | None = None):
     df = m.to_dataframe()
     df = df.droplevel(1, axis=1)
     df.reset_index(drop=False, inplace=True)
-
     print(df['index'].dtype)
-    df['index'] = df['index'].dt.to_timestamp()
-    print(df['index'].dtype)
+    if index is not None:
+        df['index'] = pd.to_datetime(index)
+    else:
+        df['index'] = df['index'].dt.to_timestamp()
 
     print(df.head(30))
     df = add_time_columns(df, 'index')
-
-    from matplotlib import pyplot as plt
-
-    df.plot(subplots=True)
-    # plt.show()
 
     return df
