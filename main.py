@@ -16,6 +16,8 @@ MONTHLY_INDEX = [
     "1992-12-01",
 ]
 
+MONTHLY_INDEX_30_YEARS = pd.read_csv('./data/monthly_data.csv')['date']
+
 
 def main():
 
@@ -27,10 +29,12 @@ def main():
         "surf_park_no_city_water",
         "surf_park_city_water",
         "surf_park_monthly_avg",
+        "surf_park_monthly",
     ]
 
     index_dict = {
         "surf_park_mensuel_copy": MONTHLY_INDEX,
+        "surf_park_monthly": MONTHLY_INDEX_30_YEARS
     }
 
     for model_name in model_list:
