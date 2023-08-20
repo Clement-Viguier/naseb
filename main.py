@@ -24,9 +24,9 @@ def main():
     model_pet_visual_crossing(data)
 
     model_list = [
-        "proto_example",
+        "surf_park_no_city_water",
         "surf_park_city_water",
-        "surf_park_mensuel_copy",
+        "surf_park_monthly_avg",
     ]
 
     index_dict = {
