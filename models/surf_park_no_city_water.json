@@ -51,11 +51,12 @@
             "max_volume": 2000,
             "initial_volume": 0,
             "min_volume": 0,
-            "cost": -10
+            "cost": 200
         },
         {
             "name": "overflow",
-            "type": "output"
+            "type": "output",
+            "cost": 100
         }
     ],
     "edges": [

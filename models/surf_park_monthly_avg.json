@@ -48,15 +48,15 @@
         {
             "name": "reservoir_tampon",
             "type": "storage",
-            "max_volume": 2000,
+            "max_volume": 0,
             "initial_volume": 0,
             "min_volume": 0,
-            "cost": -10
+            "cost": 200
         },
         {
             "name": "overflow",
             "type": "output",
-            "cost":1000
+            "cost":100
         }
     ],
     "edges": [
@@ -68,6 +68,7 @@
         ["bassin1and2", "pet"],
         ["bassin1and2", "reservoir_tampon"],
         ["reservoir_tampon", "bassin1and2"],
+        ["reservoir_tampon", "rainwater_storage"],
         ["bassin1and2", "overflow"]
     ],
     "parameters": {
@@ -138,6 +139,10 @@
         "rainwater_flow": {
             "type": "numpyarraynoderecorder",
             "node": "roof_rainwater"
+        },
+        "bassin_rainwater_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "bassin_rainwater"
         },
         "bassin_overflow": {
             "type": "numpyarraynoderecorder",
