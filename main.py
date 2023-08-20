@@ -1,6 +1,21 @@
 from naseb.model import model_surf_park, model_pet_visual_crossing
 import pandas as pd
 
+MONTHLY_INDEX = [
+    "1992-01-01",
+    "1992-02-01",
+    "1992-03-01",
+    "1992-04-01",
+    "1992-05-01",
+    "1992-06-01",
+    "1992-07-01",
+    "1992-08-01",
+    "1992-09-01",
+    "1992-10-01",
+    "1992-11-01",
+    "1992-12-01",
+]
+
 
 def main():
 
@@ -14,9 +29,14 @@ def main():
         "surf_park_mensuel_copy",
     ]
 
+    index_dict = {
+        "surf_park_mensuel_copy": MONTHLY_INDEX,
+    }
+
     for model_name in model_list:
         model_path = f"./models/{model_name}.json"
-        sim_df = model_surf_park(model_path)
+        sim_df = model_surf_park(
+            model_path, index=index_dict.get(model_name, None))
         sim_df.to_csv(f'./sim/sim_{model_name}.csv')
 
 
