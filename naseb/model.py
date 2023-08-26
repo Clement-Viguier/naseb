@@ -1,5 +1,6 @@
 
 import os
+import json
 import pandas as pd
 import networkx as nx
 import numpy as np
@@ -99,22 +100,22 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
     return data
 
 
-def model_surf_park(model_path: str | None = None, index: str or None = None):
+def model_surf_park(model_path: str | None = None, index: str or None = None, extra_params: dict | None = None):
 
     # m = Model.load("./models/hydropower_example.json")
     # m = Model.load("./models/proto_example.json")
     # m = Model.load("./models/surf_park_city_water.json")
     if model_path is None:
         model_path = "./models/surf_park_mensuel_copy.json"
+    model_json = json.loads(model_path)
 
-    m = Model.load(model_path)
+    if extra_params:
+        model_json.update(extra_params)
 
-    # print(draw_graph(m)) # only works in notebook
+    m = Model.load(model_json)
 
     stats = m.run()
     print(stats)
-
-    # print(m.recorders["turbine1_energy"].values())
 
     df = m.to_dataframe()
     df = df.droplevel(1, axis=1)

@@ -37,11 +37,20 @@ def main():
         "surf_park_monthly": MONTHLY_INDEX_30_YEARS
     }
 
+    variations = {
+        "baseline": {},
+        "high_evap": {},
+        "low_harvest": {},
+        "high_evap_low_harvest": {},
+        # "flow_limit":{} # add flow limits to the system's bottlenecks
+    }
+
     for model_name in model_list:
-        model_path = f"./models/{model_name}.json"
-        sim_df = model_surf_park(
-            model_path, index=index_dict.get(model_name, None))
-        sim_df.to_csv(f'./sim/sim_{model_name}.csv')
+        for variation, extra_params in variations.items():
+            model_path = f"./models/{model_name}.json"
+            sim_df = model_surf_park(
+                model_path, index=index_dict.get(model_name, None), extra_params=extra_params)
+            sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
 
 
 if __name__ == "__main__":
