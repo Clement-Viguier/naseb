@@ -68,6 +68,7 @@
         ["bassin1and2", "pet"],
         ["bassin1and2", "reservoir_tampon"],
         ["reservoir_tampon", "bassin1and2"],
+        ["reservoir_tampon", "rainwater_storage"],
         ["bassin1and2", "overflow"]
     ],
     "parameters": {
