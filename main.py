@@ -39,18 +39,53 @@ def main():
 
     variations = {
         "baseline": {},
-        "high_evap": {},
-        "low_harvest": {},
-        "high_evap_low_harvest": {},
+        "low_harvest": {"parameters": {
+            "recuperation_factor": {
+                "name": "recuperation_factor",
+                "type": "constant",
+                "value": 0.6
+            }}
+        },
+        "medium_evap": {"parameters": {
+            "pet_penalty_factor": {
+                "name": "pet_penalty_factor",
+                "type": "constant",
+                "value": 1.5,
+            }}
+        },
+        "high_evap": {"parameters": {
+            "pet_penalty_factor": {
+                "name": "pet_penalty_factor",
+                "type": "constant",
+                "value": 2,
+            }}
+        },
+        "high_evap_low_harvest": {"parameters": {
+            "pet_penalty_factor": {
+                "name": "pet_penalty_factor",
+                "type": "constant",
+                "value": 2,
+            },
+            "recuperation_factor": {
+                "name": "recuperation_factor",
+                "type": "constant",
+                "value": 0.6
+            }}
+        },
         # "flow_limit":{} # add flow limits to the system's bottlenecks
     }
 
+    # TODO need to check the link tampon -> rainwater_storage (other way around in schematics, but their sim assume such a link)
+
     for model_name in model_list:
         for variation, extra_params in variations.items():
+            print(f"Model: {model_name} - {variation}")
             model_path = f"./models/{model_name}.json"
             sim_df = model_surf_park(
                 model_path, index=index_dict.get(model_name, None), extra_params=extra_params)
             sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
+
+            print(sim_df['bassin_volume'].describe())
 
 
 if __name__ == "__main__":

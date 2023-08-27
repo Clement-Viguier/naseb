@@ -1,13 +1,16 @@
-
+import copy
 import os
 import json
 import pandas as pd
 import networkx as nx
 import numpy as np
 
+
 from pywr.model import Model
 from pyet.combination import penman
 # from pywr.nodes import Input, Output, Link
+
+from .utils import update_nested
 
 # name,datetime,tempmax,tempmin,temp,feelslikemax,feelslikemin,feelslike,dew,humidity,
 # precip,precipprob,precipcover,preciptype,snow,snowdepth,windgust,windspeed,winddir,
@@ -107,15 +110,18 @@ def model_surf_park(model_path: str | None = None, index: str or None = None, ex
     # m = Model.load("./models/surf_park_city_water.json")
     if model_path is None:
         model_path = "./models/surf_park_mensuel_copy.json"
-    model_json = json.loads(model_path)
+    with open(model_path, 'r') as m:
+        model_json = json.load(m)
+
+    old_model = copy.deepcopy(model_json)
 
     if extra_params:
-        model_json.update(extra_params)
+        model_json = update_nested(model_json, extra_params)
 
     m = Model.load(model_json)
-
+    # print(model_json)
     stats = m.run()
-    print(stats)
+    # print(stats)
 
     df = m.to_dataframe()
     df = df.droplevel(1, axis=1)
@@ -126,7 +132,7 @@ def model_surf_park(model_path: str | None = None, index: str or None = None, ex
     else:
         df['index'] = df['index'].dt.to_timestamp()
 
-    print(df.head(30))
+    # print(df.head(30))
     df = add_time_columns(df, 'index')
 
     return df

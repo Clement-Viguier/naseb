@@ -19,6 +19,10 @@
             "type": "link"
         },
         {
+            "name": "relevage",
+            "type": "link"
+        },
+        {
             "name": "rainwater_storage",
             "type": "storage",
             "max_volume": 1750,
@@ -84,7 +88,8 @@
         ["roof_rainwater", "rain_link"],
         ["rain_link", "rainwater_storage"],
         ["rainwater_storage", "rain_link"],
-        ["rain_link", "bassin1and2"],
+        ["rain_link", "relevage"],
+        ["relevage", "bassin1and2"],
         ["network", "city_water_storage"],
         ["city_water_storage", "city_overflow"],
         ["city_water_storage", "city_link"],
@@ -109,7 +114,7 @@
         },
         "prec":{
             "type": "dataframe",
-            "url": "../data/weather_data.csv",
+            "url": "./data/weather_data.csv",
             "column": "precip",
             "index_col": "datetime",
             "parse_dates": true
@@ -136,7 +141,7 @@
         },
         "pet":{
             "type": "dataframe",
-            "url": "../data/weather_data.csv",
+            "url": "./data/weather_data.csv",
             "column": "pet_corrected",
             "index_col": "datetime",
             "parse_dates": true
@@ -149,7 +154,7 @@
         "pet_penalty_factor": {
             "name": "pet_penalty_factor",
             "type": "constant",
-            "value": 1.5
+            "value": 1
         },
         "constant_input": {
             "name":"constant_input",
