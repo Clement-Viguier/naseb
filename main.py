@@ -90,6 +90,7 @@ def main():
         "city_link_flow": [np.mean, np.sum],
         "pet_flow": [np.mean],
         "surfer_water_flow": [np.mean, np.sum],
+        "capacity_group": [np.mean, np.median]
     }
 
     sim_list = []
@@ -112,7 +113,7 @@ def main():
             sim_list.append(sim_df)
 
     all_sims = pd.concat(sim_list)
-    print(all_sims)
+    # print(all_sims)
 
     sim_summary = all_sims.groupby(
         ['variation', 'model_name']).aggregate(agg_fct)
