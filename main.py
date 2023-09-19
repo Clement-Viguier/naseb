@@ -1,4 +1,5 @@
 from naseb.model import model_surf_park, model_pet_visual_crossing
+import numpy as np
 import pandas as pd
 
 MONTHLY_INDEX = [
@@ -19,6 +20,12 @@ MONTHLY_INDEX = [
 MONTHLY_INDEX_30_YEARS = pd.read_csv('./data/monthly_data.csv')['date']
 
 
+VOLUME_BASSIN1 = 13000
+VOLUME_BASSIN2 = 7000
+
+tol = 0.01
+
+
 def main():
 
     data = pd.read_csv(
@@ -28,6 +35,7 @@ def main():
     model_list = [
         "surf_park_no_city_water",
         "surf_park_city_water",
+        "surf_park_city_water_surfers",
         "surf_park_monthly_avg",
         "surf_park_monthly",
     ]
@@ -50,21 +58,21 @@ def main():
             "pet_penalty_factor": {
                 "name": "pet_penalty_factor",
                 "type": "constant",
-                "value": 1.5,
+                "value": 1.3,
             }}
         },
         "high_evap": {"parameters": {
             "pet_penalty_factor": {
                 "name": "pet_penalty_factor",
                 "type": "constant",
-                "value": 2,
+                "value": 1.7,
             }}
         },
         "high_evap_low_harvest": {"parameters": {
             "pet_penalty_factor": {
                 "name": "pet_penalty_factor",
                 "type": "constant",
-                "value": 2,
+                "value": 1.7,
             },
             "recuperation_factor": {
                 "name": "recuperation_factor",
@@ -77,6 +85,14 @@ def main():
 
     # TODO need to check the link tampon -> rainwater_storage (other way around in schematics, but their sim assume such a link)
 
+    agg_fct = {
+        "bassin_volume": [np.mean, np.median],
+        "city_link_flow": [np.mean, np.sum],
+        "pet_flow": [np.mean],
+        "surfer_water_flow": [np.mean, np.sum],
+    }
+
+    sim_list = []
     for model_name in model_list:
         for variation, extra_params in variations.items():
             print(f"Model: {model_name} - {variation}")
@@ -86,6 +102,23 @@ def main():
             sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
 
             print(sim_df['bassin_volume'].describe())
+
+            sim_df['capacity_group'] = pd.cut(sim_df['bassin_volume'], [
+                0, VOLUME_BASSIN2*(1-tol), VOLUME_BASSIN1*(1-tol), (VOLUME_BASSIN1+VOLUME_BASSIN2)*(1-tol)])
+
+            sim_df['variation'] = variation
+            sim_df['model_name'] = model_name
+
+            sim_list.append(sim_df)
+
+    all_sims = pd.concat(sim_list)
+    print(all_sims)
+
+    sim_summary = all_sims.groupby(
+        ['variation', 'model_name']).aggregate(agg_fct)
+
+    print(sim_summary)
+    sim_summary.to_csv('./sim/summary.csv')
 
 
 if __name__ == "__main__":
