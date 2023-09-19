@@ -90,7 +90,7 @@ def main():
         "city_link_flow": [np.mean, np.sum],
         "pet_flow": [np.mean],
         "surfer_water_flow": [np.mean, np.sum],
-        "capacity_group": [np.mean, np.median]
+        "capacity": [np.mean, np.median]
     }
 
     sim_list = []
@@ -103,9 +103,12 @@ def main():
             sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
 
             print(sim_df['bassin_volume'].describe())
-
-            sim_df['capacity_group'] = pd.cut(sim_df['bassin_volume'], [
-                0, VOLUME_BASSIN2*(1-tol), VOLUME_BASSIN1*(1-tol), (VOLUME_BASSIN1+VOLUME_BASSIN2)*(1-tol)])
+            cuts = [
+                0, VOLUME_BASSIN2*(1-tol), VOLUME_BASSIN1*(1-tol), (VOLUME_BASSIN1+VOLUME_BASSIN2)*(1-tol)]
+            sim_df['capacity_group'] = pd.cut(
+                sim_df['bassin_volume'], cuts+[np.inf], labels=cuts)
+            sim_df['capacity'] = sim_df['capacity_group'].astype(
+                float)/(VOLUME_BASSIN1+VOLUME_BASSIN2)
 
             sim_df['variation'] = variation
             sim_df['model_name'] = model_name
@@ -113,7 +116,7 @@ def main():
             sim_list.append(sim_df)
 
     all_sims = pd.concat(sim_list)
-    # print(all_sims)
+    print(all_sims['capacity_group'])
 
     sim_summary = all_sims.groupby(
         ['variation', 'model_name']).aggregate(agg_fct)
