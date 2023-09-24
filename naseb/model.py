@@ -7,8 +7,17 @@ import numpy as np
 from pywr.model import Model
 from pyet.combination import penman
 # from pywr.nodes import Input, Output, Link
+import collections.abc
 
-from .utils import update_nested
+
+def update_nested(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = update_nested(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
+
 
 # name,datetime,tempmax,tempmin,temp,feelslikemax,feelslikemin,feelslike,dew,humidity,
 # precip,precipprob,precipcover,preciptype,snow,snowdepth,windgust,windspeed,winddir,
@@ -93,7 +102,6 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
     data['pet_corrected'] = data['pet_penman']/2
 
     # data['pet_corrected'] = data['pet_corrected'].fillna(method='bfill')
-    print(data.describe())
 
     if (path is not None):
         data.to_csv(path)
@@ -117,20 +125,16 @@ def model_surf_park(model_path: str | None = None, index: str or None = None, ex
         model_json = update_nested(model_json, extra_params)
 
     m = Model.load(model_json)
-    # print(model_json)
     stats = m.run()
-    # print(stats)
 
     df = m.to_dataframe()
     df = df.droplevel(1, axis=1)
     df.reset_index(drop=False, inplace=True)
-    print(df['index'].dtype)
     if index is not None:
         df['index'] = pd.to_datetime(index)
     else:
         df['index'] = df['index'].dt.to_timestamp()
 
-    # print(df.head(30))
     df = add_time_columns(df, 'index')
 
     return df

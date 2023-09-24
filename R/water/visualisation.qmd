@@ -26,8 +26,8 @@ library(hrbrthemes)
 
 weather <- read.csv('../../data/weather_data.csv')
 
-sim_no_water <- read.csv('../../sim/sim_proto_example.csv')
-sim_city_water <- read.csv('../../sim/sim_surf_park_city_water.csv')
+sim_no_water <- read.csv('../../sim/sim_surf_park_no_city_water_high_evap.csv')
+sim_city_water <- read.csv('../../sim/sim_surf_park_city_water_surfers_high_evap_high_surfers.csv')
 ```
 
 ### Plotting
@@ -147,6 +147,7 @@ theme(
 
 ```
 
+
 ```{r, capacity}
 volume_bassin2 = 13000
 volume_bassin1 = 7000
@@ -162,8 +163,58 @@ sim_no_water <- sim_no_water %>% mutate(capacity = case_when(
   .default = total_volume)
   )
 
+weekly_no_water <- sim_no_water %>%
+  filter(year>1992) %>% 
+  group_by(year, weekofyear) %>% 
+  summarise(
+    rain_water_flow = sum(rainwater_flow),
+    pet_flow = sum(pet_flow),
+    rainwater_flow = sum(rainwater_flow),
+    bassin_rainwater_flow = sum(bassin_rainwater_flow),
+    capacity = mean(capacity),
+    bassin_volume = mean(bassin_volume)
+  )
+
 ```
 
+
+```{r, weather3}
+library(wesanderson)
+library("RColorBrewer")
+
+pal <- rev(wes_palette("Zissou1", 100, type = "continuous"))
+# pal <- brewer.pal(n = 8, name = "RdBu")
+n <-  6
+volume_bassins <- volume_bassin1+volume_bassin2
+
+p1 <- ggplot(weekly_no_water, aes(x = weekofyear, y = year, color = bassin_volume))+
+  scale_y_continuous(breaks = c(1992, 2002, 2012, 2022))
+brk <- ggplot_build(p1)$layout$panel_params[[1]]$y$breaks
+
+years <- 1992:2022
+weekofyear <- rep(58, length(years))
+df <- data.frame(Year = years, weekofyear = weekofyear)
+
+
+weekly_no_water %>%
+  ggplot() +
+  geom_tile(aes(x=weekofyear, y=year, fill=(bassin_volume/(volume_bassins)*100)), colour="white", size=0.2)+
+  scale_fill_gradientn(colours = pal, breaks = seq(0,100, length.out = n),
+                       labels = seq(0,100, length.out = n) %>% round(2))+
+  coord_polar()+
+  theme_minimal()+
+  scale_y_continuous(limits = c(1980, 2022))+
+  labs(fill="Taux de remplissage", y='', x='')+
+  annotate('text', x = 0, y = brk, label = as.character(brk), hjust=1, size=2)+
+  scale_x_continuous(breaks = seq(1, 52, length.out = 12), labels = month.abb, limits = c(0, 58))+
+  theme(axis.ticks.y=element_blank(),
+      axis.text.y=element_blank(),
+      panel.grid = element_blank(),
+      axis.ticks.x=element_blank(),
+      )
+
+
+```
 
 ```{r, capacity_plot}
 

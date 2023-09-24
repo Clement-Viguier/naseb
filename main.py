@@ -23,6 +23,8 @@ MONTHLY_INDEX_30_YEARS = pd.read_csv('./data/monthly_data.csv')['date']
 VOLUME_BASSIN1 = 13000
 VOLUME_BASSIN2 = 7000
 
+BASSIN_TOTAL_AREA = 13548
+
 tol = 0.01
 
 
@@ -34,7 +36,7 @@ def main():
 
     model_list = [
         "surf_park_no_city_water",
-        "surf_park_city_water",
+        # "surf_park_city_water",
         "surf_park_city_water_surfers",
         "surf_park_monthly_avg",
         "surf_park_monthly",
@@ -47,20 +49,20 @@ def main():
 
     variations = {
         "baseline": {},
-        "low_harvest": {"parameters": {
-            "recuperation_factor": {
-                "name": "recuperation_factor",
+        "high_surfers": {"parameters": {
+            "surfer_per_day": {
+                "name": "surfer_per_day",
                 "type": "constant",
-                "value": 0.6
+                "value": 600
             }}
         },
-        "medium_evap": {"parameters": {
-            "pet_penalty_factor": {
-                "name": "pet_penalty_factor",
-                "type": "constant",
-                "value": 1.3,
-            }}
-        },
+        # "medium_evap": {"parameters": {
+        #     "pet_penalty_factor": {
+        #         "name": "pet_penalty_factor",
+        #         "type": "constant",
+        #         "value": 1.3,
+        #     }}
+        # },
         "high_evap": {"parameters": {
             "pet_penalty_factor": {
                 "name": "pet_penalty_factor",
@@ -68,16 +70,16 @@ def main():
                 "value": 1.7,
             }}
         },
-        "high_evap_low_harvest": {"parameters": {
+        "high_evap_high_surfers": {"parameters": {
             "pet_penalty_factor": {
                 "name": "pet_penalty_factor",
                 "type": "constant",
                 "value": 1.7,
             },
-            "recuperation_factor": {
-                "name": "recuperation_factor",
+            "surfer_per_day": {
+                "name": "surfer_per_day",
                 "type": "constant",
-                "value": 0.6
+                "value": 600
             }}
         },
         # "flow_limit":{} # add flow limits to the system's bottlenecks
@@ -90,7 +92,8 @@ def main():
         "city_link_flow": [np.mean, np.sum],
         "pet_flow": [np.mean],
         "surfer_water_flow": [np.mean, np.sum],
-        "capacity": [np.mean, np.median]
+        "capacity": [np.mean, np.median],
+        "total_loss": [np.mean]
     }
 
     sim_list = []
@@ -113,6 +116,12 @@ def main():
             sim_df['variation'] = variation
             sim_df['model_name'] = model_name
 
+            if 'surfer_water_flow' in sim_df.columns:
+                sim_df['total_loss'] = sim_df['pet_flow'] + \
+                    sim_df['surfer_water_flow']
+            else:
+                sim_df['total_loss'] = sim_df['pet_flow']
+
             sim_list.append(sim_df)
 
     all_sims = pd.concat(sim_list)
@@ -120,9 +129,19 @@ def main():
 
     sim_summary = all_sims.groupby(
         ['variation', 'model_name']).aggregate(agg_fct)
-
+    sim_summary.columns = sim_summary.columns.map('|'.join).str.strip('|')
     print(sim_summary)
     sim_summary.to_csv('./sim/summary.csv')
+
+    sim_summary.reset_index(inplace=True)
+
+    sim_guigui = sim_summary[sim_summary["model_name"]
+                             == "surf_park_no_city_water"]
+    if sim_guigui.shape[0] == 4:
+        sim_guigui['sim'] = [1, 2, 4, 3]
+
+    sim_guigui.to_csv(
+        './sim/summary_no_city_water.csv')
 
 
 if __name__ == "__main__":
