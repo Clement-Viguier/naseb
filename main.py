@@ -37,9 +37,9 @@ def main():
     model_list = [
         "surf_park_no_city_water",
         # "surf_park_city_water",
-        "surf_park_city_water_surfers",
-        "surf_park_monthly_avg",
-        "surf_park_monthly",
+        # "surf_park_city_water_surfers",
+        # "surf_park_monthly_avg",
+        # "surf_park_monthly",
     ]
 
     index_dict = {
@@ -103,7 +103,6 @@ def main():
             model_path = f"./models/{model_name}.json"
             sim_df = model_surf_park(
                 model_path, index=index_dict.get(model_name, None), extra_params=extra_params)
-            sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
 
             print(sim_df['bassin_volume'].describe())
             cuts = [
@@ -122,6 +121,7 @@ def main():
             else:
                 sim_df['total_loss'] = sim_df['pet_flow']
 
+            sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
             sim_list.append(sim_df)
 
     all_sims = pd.concat(sim_list)

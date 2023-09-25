@@ -32,7 +32,7 @@ data = pd.read_csv(
 model_pet_visual_crossing(data)
 
 model_list = [
-    "surf_park_no_city_water copy",
+    "surf_park_no_city_water_split",
 ]
 
 index_dict = {
@@ -76,9 +76,12 @@ for model_name in model_list:
         model_path = f"./models/{model_name}.json"
         sim_df = model_surf_park(
             model_path, index=index_dict.get(model_name, None), extra_params=extra_params)
-        sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
         sim_df['bassin_volume'] = sim_df['bassin1_volume'] + \
             sim_df['bassin2_volume']
+        sim_df['pet_flow'] = sim_df['pet_b1_flow'] + \
+            sim_df['pet_b2_flow']
+        sim_df['bassin_rainwater_flow'] = sim_df['bassin1_rainwater_flow'] + \
+            sim_df["bassin2_rainwater_flow"]
         print(sim_df['bassin_volume'].describe())
         cuts = [
             0, VOLUME_BASSIN2*(1-tol), VOLUME_BASSIN1*(1-tol), (VOLUME_BASSIN1+VOLUME_BASSIN2)*(1-tol)]
@@ -90,6 +93,7 @@ for model_name in model_list:
         sim_df['variation'] = variation
         sim_df['model_name'] = model_name
 
+        sim_df.to_csv(f'./sim/sim_{model_name}_{variation}.csv')
         sim_list.append(sim_df)
 
 all_sims = pd.concat(sim_list)
