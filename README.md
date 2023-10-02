@@ -10,6 +10,10 @@ Le travail en cours consiste à modéliser la dynamiques des volumes d'eau dans 
 
 Nous utilisons le package [`pywr`](https://github.com/pywr/pywr) pour modéliser les flux. Le package [`pyet`](https://pyet.readthedocs.io/en/latest/) est quand à lui utilisé pour modéliser l'évapotranspiration potentielle à partir de données météo mesurées.
 
+Les modèles sont disponibles dans le dossier `models`, et les résultats de simulation sont dans le dossier `sims`.
+
+Pour le moment le modèle de référence est le modèle `surf_park_no_city_water_split.json`. Les autres modèles considères les bassons comme un bassin unique, cela ne poserait pas de problème si le modèle implémentait une évaporation dynamique en fonction du volume d'eau (dépendant de quels bassins à de l'eau). Pour dépasser cette limite, les bassins sont séparés en séries et priorité est donnée au grand bassin comme signalé par les porteurs de projet.
+
 
 ## Besoin en énergie
 
