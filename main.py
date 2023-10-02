@@ -49,20 +49,6 @@ def main():
 
     variations = {
         "baseline": {},
-        "high_surfers": {"parameters": {
-            "surfer_per_day": {
-                "name": "surfer_per_day",
-                "type": "constant",
-                "value": 600
-            }}
-        },
-        # "medium_evap": {"parameters": {
-        #     "pet_penalty_factor": {
-        #         "name": "pet_penalty_factor",
-        #         "type": "constant",
-        #         "value": 1.3,
-        #     }}
-        # },
         "high_evap": {"parameters": {
             "pet_penalty_factor": {
                 "name": "pet_penalty_factor",
@@ -70,22 +56,8 @@ def main():
                 "value": 1.7,
             }}
         },
-        "high_evap_high_surfers": {"parameters": {
-            "pet_penalty_factor": {
-                "name": "pet_penalty_factor",
-                "type": "constant",
-                "value": 1.7,
-            },
-            "surfer_per_day": {
-                "name": "surfer_per_day",
-                "type": "constant",
-                "value": 600
-            }}
-        },
         # "flow_limit":{} # add flow limits to the system's bottlenecks
     }
-
-    # TODO need to check the link tampon -> rainwater_storage (other way around in schematics, but their sim assume such a link)
 
     agg_fct = {
         "bassin_volume": [np.mean, np.median],
