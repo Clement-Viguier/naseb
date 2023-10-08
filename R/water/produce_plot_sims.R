@@ -11,8 +11,8 @@ volume_bassin2 = 13000
 volume_bassin1 = 7000
 total_volume <- volume_bassin1+volume_bassin2
 
-capacities <- c(0, volume_bassin1, volume_bassin2, total_volume)
-tolerance <- 0.0
+capacities <- c(0, volume_bassin2, total_volume)
+tolerance <- 0.05
 
 folder_path <- "/home/clement_recovery/code/naseb/sim"
 
@@ -27,7 +27,7 @@ for (file_name in file_list) {
     
     sim_no_water <- sim_no_water %>% mutate(capacity = case_when(
       bassin_volume < volume_bassin1*(1-tolerance) ~ 0,
-      bassin_volume < volume_bassin2*(1-tolerance) ~ volume_bassin1,
+      # bassin_volume < volume_bassin2*(1-tolerance) ~ volume_bassin1,
       bassin_volume < total_volume*(1-tolerance) ~ volume_bassin2, 
       .default = total_volume)
     )
@@ -74,9 +74,9 @@ for (file_name in file_list) {
     output_file <- paste0("/home/clement_recovery/code/naseb/sim/plots/", file_name, "_volume_plot.png")
     ggsave(output_file, plot = vplot, width = 8, height = 6) 
     
-    cols <- rev(wes_palette(n=5, name="Zissou1"))[c(1, 2, 3, 5)]
-    labs <- c("Aucun bassin", "Petit bassin", "Grand bassin", "Deux bassins")
-    weekly_no_water$capacity_f <- factor(weekly_no_water$capacity, labels = labs, levels = c(0, volume_bassin1, volume_bassin2, total_volume))
+    cols <- rev(wes_palette(n=5, name="Zissou1"))[c(1, 2, 5)]
+    labs <- c("Aucun bassin", "Grand bassin", "Deux bassins")
+    weekly_no_water$capacity_f <- factor(weekly_no_water$capacity, labels = labs, levels = capacities)
     cplot <- weekly_no_water %>%
       ggplot() +
       geom_tile(aes(x=weekofyear, y=year, fill=capacity_f), colour="white", size=0.2)+
