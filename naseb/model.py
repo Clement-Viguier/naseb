@@ -19,12 +19,6 @@ def update_nested(d, u):
     return d
 
 
-# name,datetime,tempmax,tempmin,temp,feelslikemax,feelslikemin,feelslike,dew,humidity,
-# precip,precipprob,precipcover,preciptype,snow,snowdepth,windgust,windspeed,winddir,
-# sealevelpressure,cloudcover,visibility,solarradiation,solarenergy,uvindex,severerisk,
-# sunrise,sunset,moonphase,conditions,description,icon,stations
-
-
 def add_time_columns(data, datetime_column: str | None = None):
     if datetime_column is None:
         datetime_column = 'datetime'
@@ -99,9 +93,8 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
         lat=np.deg2rad(site_latitude),
     )
 
+    # ad hoc correction to match empirical data
     data['pet_corrected'] = data['pet_penman']/2
-
-    # data['pet_corrected'] = data['pet_corrected'].fillna(method='bfill')
 
     if (path is not None):
         data.to_csv(path)
@@ -111,9 +104,6 @@ def model_pet_visual_crossing(data, path='./data/weather_data.csv', site_latitud
 
 def model_surf_park(model_path: str | None = None, index: str or None = None, extra_params: dict | None = None):
 
-    # m = Model.load("./models/hydropower_example.json")
-    # m = Model.load("./models/proto_example.json")
-    # m = Model.load("./models/surf_park_city_water.json")
     if model_path is None:
         model_path = "./models/surf_park_mensuel_copy.json"
     with open(model_path, 'r') as m:
