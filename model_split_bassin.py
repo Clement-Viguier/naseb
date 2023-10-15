@@ -16,6 +16,8 @@ model_pet_visual_crossing(data)
 
 model_list = [
     "surf_park_no_city_water_split",
+    "surf_park_no_city_water_split_meteofrance_merignac",
+    "surf_park_city_water_split_meteofrance_merignac",
 ]
 
 variations = {
@@ -35,7 +37,8 @@ agg_fct = {
     "bassin2_volume": [np.mean, np.median],
     "pet_b1_flow": [np.mean],
     "pet_b2_flow": [np.mean],
-    "capacity": [np.mean, np.median]
+    "capacity": [np.mean, np.median],
+    "city_link_flow": [np.mean, np.sum]
 }
 
 sim_list = []
