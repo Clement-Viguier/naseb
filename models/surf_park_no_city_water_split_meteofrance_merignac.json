@@ -1,0 +1,215 @@
+{
+    "metadata": {
+        "title": "A simple model of a surfing pool with a storage reservoir",
+        "description": "This model uses weather data from Merignac."
+    },
+    "timestepper": {
+        "start": "1993-01-01",
+        "end": "2023-09-30",
+        "timestep": 1
+    },
+    "nodes": [
+        {
+            "name": "roof_rainwater",
+            "type": "catchment",
+            "flow": "roof_prec"
+        },
+        {
+            "name": "rain_link",
+            "type": "link"
+        },
+        {
+            "name": "relevage",
+            "type": "link"
+        },
+        {
+            "name": "rainwater_storage",
+            "type": "storage",
+            "max_volume": 1750,
+            "min_volume": 0,
+            "initial_volume": 0,
+            "cost": -10
+        },
+        {
+            "name": "bassin1_rainwater",
+            "type": "catchment",
+            "flow": "bassin1_prec"
+        },
+        {
+            "name": "bassin2_rainwater",
+            "type": "catchment",
+            "flow": "bassin2_prec"
+        },
+        {
+            "name": "bassin1",
+            "type": "storage",
+            "max_volume": 13000,
+            "min_volume": 0,
+            "initial_volume": 13000,
+            "cost": -300
+        },
+        {
+            "name": "pet_b1",
+            "type": "output",
+            "max_flow":"bassin1_pet",
+            "cost": -500
+        },
+        {
+            "name": "bassin2",
+            "type": "storage",
+            "max_volume": 7000,
+            "min_volume": 0,
+            "initial_volume": 7000,
+            "cost": -100
+        },
+        {
+            "name": "pet_b2",
+            "type": "output",
+            "max_flow":"bassin2_pet",
+            "cost": -200
+        },
+        {
+            "name": "reservoir_tampon",
+            "type": "storage",
+            "max_volume": 2000,
+            "initial_volume": 0,
+            "min_volume": 0,
+            "cost": -10
+        },
+        {
+            "name": "overflow",
+            "type": "output",
+            "cost": 100
+        }
+    ],
+    "edges": [
+        ["roof_rainwater", "rain_link"],
+        ["rain_link", "rainwater_storage"],
+        ["rainwater_storage", "rain_link"],
+        ["rain_link", "relevage"],
+        ["relevage", "bassin1"],
+        ["bassin1_rainwater", "bassin1"],
+        ["bassin2_rainwater", "bassin2"],
+        ["bassin1", "bassin2"],
+        ["bassin2", "bassin1"],
+        ["bassin1", "pet_b1"],
+        ["bassin2", "pet_b2"],
+        ["bassin1", "reservoir_tampon"],
+        ["reservoir_tampon", "bassin1"],
+        ["reservoir_tampon", "rainwater_storage"], 
+        ["bassin1", "overflow"]
+    ],
+    "parameters": {
+        "roof_prec": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["prec", "recuperation_factor", "roof_area", "mm_to_m3"]
+        },
+        "bassin2_prec": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["prec", "bassin2_area", "mm_to_m3"]
+        },
+        "bassin1_prec": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["prec", "bassin1_area", "mm_to_m3"]
+        },
+        "prec":{
+            "type": "dataframe",
+            "url": "./data/Merignac_METEO_STATION_33281001.csv",
+            "column": "RR",
+            "index_col": "DATE",
+            "parse_dates": true
+        },
+        "recuperation_factor": {
+            "name": "recuperation_factor",
+            "type": "constant",
+            "value": 0.6
+        },
+        "roof_area": {
+            "name": "roof_area",
+            "type": "constant",
+            "value": 23833
+        },
+        "mm_to_m3": {
+            "name": "mm_to_m3",
+            "type": "constant",
+            "value": 0.001
+        },
+        "bassin1_pet": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["pet", "bassin1_area", "pet_penalty_factor", "mm_to_m3"]
+        },
+        "bassin2_pet": {
+            "type": "aggregated",
+            "agg_func": "product",
+            "parameters": ["pet", "bassin2_area", "pet_penalty_factor", "mm_to_m3"]
+        },
+        "pet":{
+            "type": "dataframe",
+            "url": "./data/Merignac_METEO_STATION_33281001.csv",
+            "column": "ETPP",
+            "index_col": "DATE",
+            "parse_dates": true
+        },
+        "bassin2_area": {
+            "name": "bassin2_area",
+            "type": "constant",
+            "value": 4080
+        },
+        "bassin1_area": {
+            "name": "bassin1_area",
+            "type": "constant",
+            "value": 9448
+        },
+        "pet_penalty_factor": {
+            "name": "pet_penalty_factor",
+            "type": "constant",
+            "value": 1.3
+        }
+    },
+    "recorders": {
+        "bassin1_volume": {
+            "type": "numpyarraystoragerecorder",
+            "node": "bassin1"
+        },
+        "bassin2_volume": {
+            "type": "numpyarraystoragerecorder",
+            "node": "bassin2"
+        },
+        "pet_b1_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "pet_b1"
+        },
+        "pet_b2_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "pet_b2"
+        },
+        "rainwater_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "roof_rainwater"
+        },
+        "bassin1_rainwater_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "bassin1_rainwater"
+        },
+        "bassin2_rainwater_flow": {
+            "type": "numpyarraynoderecorder",
+            "node": "bassin2_rainwater"
+        },
+        "bassin_overflow": {
+            "type": "numpyarraynoderecorder",
+            "node": "overflow"
+        },
+        "tampon": {
+            "type": "numpyarraystoragerecorder",
+            "node": "reservoir_tampon"
+        },
+        "rain_reservoir": {
+            "type": "numpyarraystoragerecorder",
+            "node": "rainwater_storage"
+        }
+    }
+}
