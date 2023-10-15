@@ -26,7 +26,7 @@ for (file_name in file_list) {
     
     
     sim_no_water <- sim_no_water %>% mutate(capacity = case_when(
-      bassin_volume < volume_bassin1*(1-tolerance) ~ 0,
+      bassin_volume < volume_bassin2*(1-tolerance) ~ 0,
       # bassin_volume < volume_bassin2*(1-tolerance) ~ volume_bassin1,
       bassin_volume < total_volume*(1-tolerance) ~ volume_bassin2, 
       .default = total_volume)
@@ -60,7 +60,7 @@ for (file_name in file_list) {
                            labels = seq(0,100, length.out = n) %>% round(2))+
       coord_polar()+
       theme_minimal()+
-      scale_y_continuous(limits = c(1980, 2022))+
+      scale_y_continuous(limits = c(1980, 2023))+
       labs(fill="Taux de remplissage", y='', x='')+
       annotate('text', x = 0, y = brk, label = as.character(brk), hjust=1, size=2)+
       scale_x_continuous(breaks = seq(1, 52, length.out = 12), labels = month.abb, limits = c(0, 58))+
@@ -83,7 +83,7 @@ for (file_name in file_list) {
       scale_fill_manual(values=cols)+
       coord_polar()+
       theme_minimal()+
-      scale_y_continuous(limits = c(1980, 2022))+
+      scale_y_continuous(limits = c(1980, 2023))+
       labs(fill="Capacité", y='', x='')+
       annotate('text', x = 0, y = brk, label = as.character(brk), hjust=1, size=2)+
       scale_x_continuous(breaks = seq(1, 52, length.out = 12), labels = month.abb, limits = c(0, 58))+
