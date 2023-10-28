@@ -10,12 +10,12 @@ BASSIN_TOTAL_AREA = 13548
 tol = 0.01
 
 # technically only necessary once
-data = pd.read_csv(
-    './data/canéjan interpolé 1992-01-01 to 2022-12-31.csv')
-model_pet_visual_crossing(data)
+# data = pd.read_csv(
+#     './data/canéjan interpolé 1992-01-01 to 2022-12-31.csv')
+# model_pet_visual_crossing(data)
 
 model_list = [
-    "surf_park_no_city_water_split",
+    # "surf_park_no_city_water_split",
     "surf_park_no_city_water_split_meteofrance_merignac",
     "surf_park_city_water_split_meteofrance_merignac",
 ]
